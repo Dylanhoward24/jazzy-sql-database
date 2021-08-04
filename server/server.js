@@ -4,7 +4,7 @@ const pg = require('pg');
 
 // create a connection "pool" to our postgres DB
 const pool = new pg.Pool({
-    database: 'artist', // <-- name of the database
+    database: 'jazzy_sql', // <-- name of the database
 
     // optional parameters
     host: 'localhost',
@@ -59,13 +59,46 @@ const songList = [
 ];
 
 app.get('/artist', (req, res) => {
-    console.log(`In /songs GET`);
-    res.send(artistList);
+    let sqlQuery = `
+        SELECT * FROM "artist"
+        ORDER BY "birthdate" ASC;
+    `;
+    pool.query(sqlQuery)
+        .then((dbRes) => {
+            // send the db results
+            // to the client
+            res.send(dbRes.rows);
+        }).catch((err) => {
+            console.log('SQL failed', err);
+            res.sendStatus(500);
+        });
 });
 
 app.post('/artist', (req, res) => {
-    artistList.push(req.body);
-    res.sendStatus(201);
+    let sqlQuery = `
+        INSERT INTO "artist"
+            ("name", "birthdate")
+        VALUES
+            ($1, $2);
+    `;
+    let sqlParams = [
+        req.body.name,      // $1
+        req.body.birthdate  // $2
+    ];
+
+    console.log('sqlQuery', sqlQuery);
+
+    // send the query to the db
+    pool.query(sqlQuery)
+        // everyone is happy, so just send
+        // a happy little response back
+        // bob ross style!!
+        .then((dbRes) => {
+            res.sendStatus(201); // created
+        }).catch((err) => {
+            console.log('POST error', err);
+            res.sendStatus(500);
+        });
 });
 
 app.get('/song', (req, res) => {
