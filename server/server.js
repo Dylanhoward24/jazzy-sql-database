@@ -1,5 +1,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const pg = require('pg');
+
+// create a connection "pool" to our postgres DB
+const pool = new pg.Pool({
+    database: 'jazzy_sql', // <-- name of the database
+
+    // optional parameters
+    host: 'localhost',
+    port: 5432
+});
 
 const app = express();
 const PORT = 5000;
@@ -49,23 +59,90 @@ const songList = [
 ];
 
 app.get('/artist', (req, res) => {
-    console.log(`In /songs GET`);
-    res.send(artistList);
+    let sqlQuery = `
+        SELECT * FROM "artist"
+        ORDER BY "birthdate" ASC;
+    `;
+    pool.query(sqlQuery)
+        .then((dbRes) => {
+            // send the db results
+            // to the client
+            res.send(dbRes.rows);
+        }).catch((err) => {
+            console.log('SQL failed', err);
+            res.sendStatus(500);
+        });
 });
 
 app.post('/artist', (req, res) => {
-    artistList.push(req.body);
-    res.sendStatus(201);
+    let sqlQuery = `
+        INSERT INTO "artist"
+            ("name", "birthdate")
+        VALUES
+            ('${req.body.name}', '${req.body.birthdate}')
+    `;
+    // let sqlParams = [
+    //     req.body.name,      // $1
+    //     req.body.birthdate  // $2
+    // ];
+
+    console.log('sqlQuery', sqlQuery);
+
+    // send the query to the db
+    pool.query(sqlQuery)
+        // everyone is happy, so just send
+        // a happy little response back
+        // bob ross style!!
+        .then((dbRes) => {
+            res.sendStatus(201); // created
+        }).catch((err) => {
+            console.log('POST error', err);
+            res.sendStatus(500);
+        });
 });
 
 app.get('/song', (req, res) => {
-    console.log(`In /songs GET`);
-    res.send(songList);
+    let sqlQuery = `
+        SELECT * FROM "song"
+        ORDER BY "title";
+    `;
+    pool.query(sqlQuery)
+        .then((dbRes) => {
+            // send the db results
+            // to the client
+            res.send(dbRes.rows);
+        }).catch((err) => {
+            console.log('SQL failed', err);
+            res.sendStatus(500);
+        });
 });
 
 app.post('/song', (req, res) => {
-    songList.push(req.body);
-    res.sendStatus(201);
+    let sqlQuery = `
+        INSERT INTO "song"
+            ("title", "length", "released")
+        VALUES
+            ('${req.body.title}', '${req.body.length}', '${req.body.released}')
+    `;
+    // let sqlParams = [
+    //     req.body.title,     // $1
+    //     req.body.length,    // $2
+    //     req.body.released   // $3
+    // ];
+
+    console.log('sqlQuery', sqlQuery);
+
+    // send the query to the db
+    pool.query(sqlQuery)
+        // everyone is happy, so just send
+        // a happy little response back
+        // bob ross style!!
+        .then((dbRes) => {
+            res.sendStatus(201); // created
+        }).catch((err) => {
+            console.log('POST error', err);
+            res.sendStatus(500);
+        });
 });
 
 
