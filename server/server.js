@@ -1,5 +1,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const pg = require('pg');
+
+// create a connection "pool" to our postgres DB
+const pool = new pg.Pool({
+    database: 'artist', // <-- name of the database
+
+    // optional parameters
+    host: 'localhost',
+    port: 5432
+});
 
 const app = express();
 const PORT = 5000;
