@@ -79,24 +79,24 @@ app.post('/artist', (req, res) => {
         INSERT INTO "artist"
             ("name", "birthdate")
         VALUES
-            ('${req.body.name}', '${req.body.birthdate}')
+            ($1, $2)
     `;
-    // let sqlParams = [
-    //     req.body.name,      // $1
-    //     req.body.birthdate  // $2
-    // ];
+    let sqlParams = [
+        req.body.name,      // $1
+        req.body.birthdate  // $2
+    ];
 
     console.log('sqlQuery', sqlQuery);
 
     // send the query to the db
-    pool.query(sqlQuery)
+    pool.query(sqlQuery, sqlParams)
         // everyone is happy, so just send
         // a happy little response back
         // bob ross style!!
         .then((dbRes) => {
             res.sendStatus(201); // created
         }).catch((err) => {
-            console.log('POST error', err);
+            console.log('POST /artist error', err);
             res.sendStatus(500);
         });
 });
@@ -122,13 +122,13 @@ app.post('/song', (req, res) => {
         INSERT INTO "song"
             ("title", "length", "released")
         VALUES
-            ('${req.body.title}', '${req.body.length}', '${req.body.released}')
+            ($1, $2, $3)
     `;
-    // let sqlParams = [
-    //     req.body.title,     // $1
-    //     req.body.length,    // $2
-    //     req.body.released   // $3
-    // ];
+    let sqlParams = [
+        req.body.title,     // $1
+        req.body.length,    // $2
+        req.body.released   // $3
+    ];
 
     console.log('sqlQuery', sqlQuery);
 
@@ -140,7 +140,7 @@ app.post('/song', (req, res) => {
         .then((dbRes) => {
             res.sendStatus(201); // created
         }).catch((err) => {
-            console.log('POST error', err);
+            console.log('POST /song error', err);
             res.sendStatus(500);
         });
 });
